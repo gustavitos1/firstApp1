@@ -31,8 +31,8 @@ def main(page: ft.Page):
                 emprego=input_profissao.value)
             lista.append(obj_user)
             input_nome.value = ""
-            input_nome.value = ""
-            input_nome.value = ""
+            input_profissao.value = ""
+            input_salario.value = ""
             page.overlay.append(msg_sucesso)
             msg_sucesso.open = True
             page.update()
