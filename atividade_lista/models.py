@@ -1,11 +1,13 @@
-from sqlalchemy import create_engine, Column, String, Integer, Float
-from sqlalchemy.orm import relationship, sessionmaker, scoped_session, declarative_base
+from sqlalchemy import create_engine, Column, String, Integer
+from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 
 engine = create_engine('sqlite:///books.sqlite', echo=True)
 db_session = scoped_session(sessionmaker(bind=engine))
 
 Base = declarative_base()
 Base.query = db_session.query_property()
+Session = sessionmaker(bind=engine)
+session = Session()
 
 class Livro(Base):
     __tablename__ = 'livros'
@@ -28,11 +30,16 @@ class Livro(Base):
         db_session.commit()
 
     def serialize(self):
-        dados_livro = {
-            'id_livro': self.id_livro,
-            'titulo': self.titulo,
-            'autor': self.autor,
-            'categoria': self.categoria,
-            'descricao': self.descricao
-        }
-        return dados_livro
+        try:
+            dados = {
+                "titulo": self.titulo,
+                "autor": self.autor,
+                "descricao": self.descricao,
+                "categoria": self.categoria,
+            }
+            return dados
+        except Exception as e:
+            print(f"Erro ao serializar o livro: {e}")
+            return None
+
+Base.metadata.create_all(engine)

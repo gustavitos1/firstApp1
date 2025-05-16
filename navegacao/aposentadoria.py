@@ -108,7 +108,7 @@ def main(page: ft.Page):
             ft.View(
                 "/",
                 [
-                    ft.AppBar(Image(src="inss.png"),title=ft.Text("INSS Simulador de Aposentadoria"), bgcolor=ft.Colors.PRIMARY_CONTAINER),
+                    ft.AppBar(Image(src="../static/inss.png"), title=ft.Text("INSS Simulador de Aposentadoria"), bgcolor=ft.Colors.PRIMARY_CONTAINER),
                     ft.ElevatedButton(
                         text="Simular Aposentadoria", on_click=lambda _: page.go("/segunda")
                     ),
@@ -116,7 +116,7 @@ def main(page: ft.Page):
                         text="Ver Regras", on_click=lambda _: page.go("/terceira")
                     ),
                     Container(
-                        Image(src="guaxas.png", width=90, height=90),
+                        Image(src="../static/guaxas.png", width=90, height=90),
                         alignment=ft.alignment.bottom_right,
                         expand=True
                     )

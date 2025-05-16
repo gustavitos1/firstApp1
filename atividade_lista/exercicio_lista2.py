@@ -1,13 +1,7 @@
 import flet as ft
 from flet import *
-from sqlalchemy import *
+from atividade_lista.models import *
 
-class Livro():
-    def __init__(self, titulo, autor, categoria, descricao):
-        self.titulo = titulo
-        self.autor = autor
-        self.categoria = categoria
-        self.descricao = descricao
 
 def main(page: ft.Page):
     page.title = "Exemplo de Rotas"
@@ -23,40 +17,46 @@ def main(page: ft.Page):
             msg_error.open = True
             page.update()
         else:
-            obj_livro = Livro(
-                titulo=input_titulo.value,
-                autor=input_autor.value,
+            with Session() as session:
+                obj_livro = Livro(
+                    titulo=input_titulo.value,
+                    autor=input_autor.value,
                 categoria=input_categoria.value,
                 descricao=input_descricao.value
-            )
-            listas.append(obj_livro)
-            input_titulo.value = ""
-            input_autor.value = ""
-            input_categoria.value = ""
-            input_descricao.value = ""
-            page.overlay.append(msg_sucesso)
-            msg_sucesso.open = True
-            page.update()
+                )
+                session.add(obj_livro)
+                session.commit()
+                listas.append(obj_livro)
+                input_titulo.value = ""
+                input_autor.value = ""
+                input_categoria.value = ""
+                input_descricao.value = ""
+                page.overlay.append(msg_sucesso)
+                msg_sucesso.open = True
+                page.update()
+                exibir_lista(e)
 
     def exibir_lista(e):
         lv_livros.controls.clear()
-        for livro in listas:
-            lv_livros.controls.append(
-                ft.ListTile(
-                    leading=ft.Icon(ft.Icons.BOOK),
-                    title=ft.Text(f"Livro: {livro.titulo}"),
-                    subtitle=ft.Text(f"Autor: {livro.autor}"),
-                    trailing=ft.PopupMenuButton(
-                        icon=ft.Icons.MORE_VERT,
-                        items=[
-                            ft.PopupMenuItem(
-                                text="Detalhes",
-                                on_click=lambda e, obj_livro=livro: exibir_detalhes(obj_livro)
-                            )
-                        ],
+        with Session() as session:
+            livros = session.query(Livro).all()
+            for livro in livros:
+                lv_livros.controls.append(
+                    ft.ListTile(
+                        leading=ft.Icon(ft.Icons.BOOK),
+                        title=ft.Text(f"Livro: {livro.titulo}"),
+                        subtitle=ft.Text(f"Autor: {livro.autor}"),
+                        trailing=ft.PopupMenuButton(
+                            icon=ft.Icons.MORE_VERT,
+                            items=[
+                                ft.PopupMenuItem(
+                                    text="Detalhes",
+                                    on_click=lambda e, obj_livro=livro: exibir_detalhes(obj_livro)
+                                )
+                            ],
+                        )
                     )
                 )
-            )
         page.update()
 
     def exibir_detalhes(livro):
@@ -68,7 +68,7 @@ def main(page: ft.Page):
             View(
                 "/",
                 [
-                    AppBar(title=Text("Home"), bgcolor=Colors.PRIMARY_CONTAINER),
+                    AppBar(title=ft.Text("Home"), bgcolor=Colors.PRIMARY_CONTAINER),
                     input_titulo,
                     input_autor,
                     input_categoria,
@@ -91,7 +91,7 @@ def main(page: ft.Page):
                 View(
                     "/segunda",
                     [
-                        AppBar(title=Text("Livros"), bgcolor=Colors.PRIMARY_CONTAINER),
+                        AppBar(title=ft.Text("Livros"), bgcolor=Colors.PRIMARY_CONTAINER),
                         lv_livros
                     ]
                 )
@@ -99,14 +99,15 @@ def main(page: ft.Page):
 
         if page.route.startswith("/terceira/"):
             livro_nome = page.route.split("/terceira/")[1]
-            livro_selecionado = next((livro for livro in listas if livro.titulo == livro_nome), None)
+            with Session() as session:
+                livro_selecionado = session.query(Livro).filter_by(titulo=livro_nome).first()
 
             if livro_selecionado:
                 page.views.append(
                     View(
                         "/terceira",
                         [
-                            AppBar(title=Text("Detalhes do Livro"), bgcolor=Colors.PRIMARY_CONTAINER),
+                            AppBar(title=ft.Text("Detalhes do Livro"), bgcolor=Colors.PRIMARY_CONTAINER),
                             ft.Text(f"Livro: {livro_selecionado.titulo}"),
                             ft.Text(f"Autor: {livro_selecionado.autor}"),
                             ft.Text(f"Categoria: {livro_selecionado.categoria}"),

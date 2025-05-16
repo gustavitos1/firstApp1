@@ -3,7 +3,6 @@ from flet import *
 
 
 def main(page: ft.Page):
-    # Configuração de página
     page.title = "Exemplo de Rotas"
     page.theme_mode = ft.ThemeMode.DARK
     page.window_width = 400
